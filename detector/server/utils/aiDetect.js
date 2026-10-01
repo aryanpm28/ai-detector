@@ -69,7 +69,7 @@ async function analyzeText(text) {
     // llama-3.1-8b-instant, mixtral-8x7b-32768, gemma2-9b-it, etc.
     // Using a fast, high-quality open model available on Groq.
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages: [
         { role: 'system', content: JUDGE_SYSTEM_PROMPT },
         { role: 'user', content: cleaned.slice(0, 6000) },
