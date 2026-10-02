@@ -31,6 +31,42 @@ app.use(
 
 app.use(express.json({ limit: '2mb' }));
 
+// Simple in-memory rate limiter
+const rateLimitStore = new Map();
+
+function rateLimit(windowMs, maxRequests) {
+  return (req, res, next) => {
+    const key = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+
+    let entry = rateLimitStore.get(key);
+
+    if (!entry || now - entry.startTime >= windowMs) {
+      entry = {
+        startTime: now,
+        count: 0,
+      };
+    }
+
+    entry.count += 1;
+    rateLimitStore.set(key, entry);
+
+    if (entry.count > maxRequests) {
+      return res.status(429).json({
+        message: 'Too many requests. Please try again later.',
+      });
+    }
+
+    next();
+  };
+}
+
+const authLimiter = rateLimit(15 * 60 * 1000, 30);
+const analyzeLimiter = rateLimit(60 * 1000, 20);
+
+app.use('/api/auth', authLimiter);
+app.use('/api/analyze', analyzeLimiter);
+
 app.get('/', (req, res) => {
   res.json({ message: 'AI Detector API is running 🚀' });
 });
