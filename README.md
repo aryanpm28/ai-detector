@@ -8,6 +8,10 @@ Portfolio project that estimates how likely a document is **AI-generated vs huma
 
 Text is extracted in the browser — only plain text is sent to the backend / AI provider, never the original file.
 
+## Live Demo
+
+https://ai-detector-five-bay.vercel.app
+
 ## Features
 
 - React form: upload a document or paste/write text
@@ -20,47 +24,18 @@ Text is extracted in the browser — only plain text is sent to the backend / AI
 - Auth: register / login, JWT sessions, bcrypt-hashed passwords
 - Saved analysis history per user (list + delete)
 - Centralized Express error handling with domain-specific error types
+- API rate limiting for authentication and analysis endpoints
+- Responsive React interface
 
-## Tech Stack
+## How AI Detection Works
 
-| Layer    | Technology                                                                 |
-| -------- | -------------------------------------------------------------------------- |
-| Frontend | React 18, Vite, Tailwind CSS, Axios, React Router, Recharts, pdf.js, mammoth |
-| Backend  | Node.js, Express, Mongoose, JWT, bcryptjs, dotenv, cors                    |
-| Database | MongoDB                                                                    |
-| AI       | Groq (OpenAI-compatible) + local stylometric heuristic                     |
+The application combines two signals.
 
-## Project Structure
+### 1. Groq LLM
+
+The backend sends the submitted text to Groq using its OpenAI-compatible API.
+
+Current model:
 
 ```text
-detector
-├── server
-│   ├── index.js
-│   ├── middleware
-│   │   ├── auth.js
-│   │   └── errorHandler.js
-│   ├── models
-│   │   ├── User.js
-│   │   └── Analysis.js
-│   ├── routes
-│   │   ├── auth.js
-│   │   └── analyze.js
-│   └── utils
-│       ├── aiDetect.js      # LLM judge + blend with heuristic
-│       ├── heuristic.js     # Phrase lists + stylometric signals
-│       └── errors.js
-├── src
-│   ├── App.jsx
-│   ├── auth.js
-│   ├── main.jsx
-│   ├── readFile.js          # Browser-side PDF / DOCX / text extraction
-│   ├── pages
-│   │   ├── Home.jsx         # Analyzer + highlights + chart
-│   │   ├── History.jsx
-│   │   ├── Login.jsx
-│   │   └── Signup.jsx
-│   └── utils
-│       ├── api.js
-│       └── highlight.js     # Client-side AI / human phrase highlighting
-├── package.json
-└── vite.config.js
+openai/gpt-oss-120b
