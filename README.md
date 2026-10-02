@@ -14,28 +14,82 @@ https://ai-detector-five-bay.vercel.app
 
 ## Features
 
-- React form: upload a document or paste/write text
-- File support: PDF, Word (`.docx`), TXT, MD, CSV, JSON, HTML, RTF, and other text formats (`pdf.js` + `mammoth` in the browser)
-- Optional keyword search inside the document
+- Upload a document or paste/write text (PDF, DOCX, TXT, MD, CSV, JSON, HTML, and more)
+- Optional keyword search
 - AI vs Human score with pie chart (Recharts)
-- Text highlighting — AI-style phrases in red, human-style signals in green
-- LLM short written rationale when the provider is available
-- Graceful fallback to heuristic-only scoring if no API key or the provider fails (`source: "heuristic_fallback"`)
-- Auth: register / login, JWT sessions, bcrypt-hashed passwords
-- Saved analysis history per user (list + delete)
-- Centralized Express error handling with domain-specific error types
-- API rate limiting for authentication and analysis endpoints
-- Responsive React interface
+- Text highlighting (AI-style in red, human-style in green)
+- LLM rationale when the provider is available
+- Heuristic-only fallback if Groq is unavailable (`source: "heuristic_fallback"`)
+- Register / login with JWT + bcrypt
+- Per-user analysis history (list + delete)
+- Rate limiting on auth and analyze endpoints
+- Centralized Express error handling
 
-## How AI Detection Works
+## How detection works
 
-The application combines two signals.
+1. **Groq LLM** (`openai/gpt-oss-120b`) — returns AI probability (0–100) and short reasoning  
+2. **Local heuristic** — phrase lists, sentence length, punctuation, structure  
 
-### 1. Groq LLM
+Final score: **75% LLM + 25% heuristic**. Falls back to heuristic-only if the provider fails.
 
-The backend sends the submitted text to Groq using its OpenAI-compatible API.
+> Detection is probabilistic — not definitive proof of authorship.
 
-Current model:
+## Tech Stack
+
+| Layer    | Technology |
+| -------- | ---------- |
+| Frontend | React 18, Vite, Tailwind, Axios, React Router, Recharts, pdf.js, mammoth |
+| Backend  | Node.js, Express, Mongoose, JWT, bcryptjs |
+| Database | MongoDB Atlas |
+| AI       | Groq + local stylometric heuristic |
+| Hosting  | Vercel |
+
+## Project Structure
 
 ```text
-openai/gpt-oss-120b
+ai-detector/
+├── docs/                  # Screenshots
+└── detector/
+    ├── public/            # favicon
+    ├── server/            # Express API
+    │   ├── middleware/
+    │   ├── models/
+    │   ├── routes/
+    │   └── utils/         # aiDetect.js, heuristic.js
+    ├── src/               # React app
+    │   ├── pages/
+    │   └── utils/
+    └── vercel.json
+Setup
+Backend
+Bashcd detector/server
+npm install
+# set env vars (see below)
+npm run dev   # http://localhost:5001
+Frontend
+Bashcd detector
+npm install
+npm run dev   # http://localhost:5173
+Environment Variables
+
+VariablePurposeMONGODB_URIMongoDB connection stringJWT_SECRETJWT signing secretOPENAI_API_KEYGroq API key (name is OpenAI-style; provider is Groq)CLIENT_ORIGINFrontend origin for CORSPORTLocal backend port (default 5001)
+Production frontend uses same-origin /api.
+API
+
+MethodEndpointAuthPOST/api/auth/registerNoPOST/api/auth/loginNoGET/api/auth/meJWTPOST/api/analyzeJWTGET/api/analyzeJWTGET/api/analyze/:idJWTDELETE/api/analyze/:idJWT
+Header: Authorization: Bearer <token>
+Deployment
+textVercel
+├── React + Vite frontend
+└── Express backend → MongoDB Atlas → Groq
+/api/* → backend · /* → frontend (SPA)
+Security notes
+
+Passwords hashed with bcrypt; secrets via env (not committed)
+JWT on protected routes; ownership checks on history
+Rate limits: auth 30/15min, analyze 20/min
+Only text snippets stored — not full documents
+
+Author
+Aryan Patil · GitHub · Live demo
+textShort enough for GitHub, still covers demo, model, stack, setup, env, API, and deploy.
