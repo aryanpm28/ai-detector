@@ -1,9 +1,19 @@
 /**
  * Highlight known AI-style and human-style phrases in text.
- * Phrase lists kept in sync with server/utils/heuristic.js
+ * Phrase lists kept in sync with server/utils/heuristic.js where possible.
+ *
+ * Notes:
+ * - Matching is case-insensitive substring/phrase based.
+ * - Longer phrases are preferred (regex is sorted by length).
+ * - These are heuristic signals used by many detectors conceptually
+ *   (formal transitions, AI self-talk, filler academic phrasing).
+ *   They are NOT a guarantee of AI authorship.
  */
 
 export const AI_PHRASES = [
+  // =========================
+  // AI self-identification
+  // =========================
   "as an ai",
   "as a language model",
   "as an ai language model",
@@ -35,6 +45,19 @@ export const AI_PHRASES = [
   "according to my training",
   "i was trained",
   "i have been trained",
+  "as a large language model",
+  "i don't have real-time",
+  "i do not have real-time",
+  "i cannot browse the internet",
+  "i can't browse the internet",
+  "i don't have access to",
+  "i do not have access to",
+  "i cannot access personal data",
+  "i can't access personal data",
+
+  // =========================
+  // Essay / article openers
+  // =========================
   "in this passage",
   "in this article",
   "in this essay",
@@ -55,6 +78,21 @@ export const AI_PHRASES = [
   "this article provides",
   "this essay provides",
   "this discussion provides",
+  "this paper examines",
+  "this paper explores",
+  "this paper discusses",
+  "this paper aims to",
+  "this essay aims to",
+  "this article aims to",
+  "the purpose of this",
+  "the aim of this",
+  "the goal of this essay",
+  "the goal of this article",
+  "the objective of this",
+
+  // =========================
+  // Hedging / formal framing
+  // =========================
   "it is important to note",
   "it is worth noting",
   "it should be noted",
@@ -64,6 +102,37 @@ export const AI_PHRASES = [
   "it is worth mentioning",
   "it should also be noted",
   "needless to say",
+  "it is important to consider",
+  "it is worth considering",
+  "it is important to recognize",
+  "it is important to recognise",
+  "it is essential to understand",
+  "it is crucial to understand",
+  "it is useful to consider",
+  "it is helpful to consider",
+  "it is worth mentioning that",
+  "it is important to understand that",
+  "it is important to recognize that",
+  "it is essential to understand that",
+  "it is crucial to understand that",
+  "it is safe to say",
+  "one might argue",
+  "it can be argued",
+  "it could be argued",
+  "it is reasonable to suggest",
+  "it is reasonable to assume",
+  "it can be seen that",
+  "it can be observed that",
+  "it can be understood that",
+  "it is evident that",
+  "it is apparent that",
+  "it is clear that",
+  "it becomes clear that",
+  "it is clear from",
+
+  // =========================
+  // Transitions (very common in LLM text)
+  // =========================
   "in conclusion",
   "to conclude",
   "in summary",
@@ -78,6 +147,7 @@ export const AI_PHRASES = [
   "moreover",
   "additionally",
   "in addition",
+  "in addition to this",
   "likewise",
   "consequently",
   "therefore",
@@ -105,6 +175,7 @@ export const AI_PHRASES = [
   "with that in mind",
   "that being said",
   "having said that",
+  "with that being said",
   "taking into account",
   "taking this into consideration",
   "from this perspective",
@@ -112,10 +183,34 @@ export const AI_PHRASES = [
   "in this context",
   "in this regard",
   "in this respect",
+  "first and foremost",
+  "first of all",
+  "to begin with",
+  "to start with",
+  "next,",
+  "subsequently",
+  "thereafter",
+  "meanwhile",
+  "simultaneously",
+  "nevertheless",
+  "nonetheless",
+  "however,",
+  "in spite of this",
+  "despite this",
+  "as mentioned earlier",
+  "as previously mentioned",
+  "as noted above",
+  "as discussed above",
+  "as outlined above",
+
+  // =========================
+  // Buzzwords / "AI vocabulary"
+  // =========================
   "in today's digital age",
   "in today's fast-paced world",
   "in today's rapidly changing world",
   "in today's modern world",
+  "in today's world",
   "in the modern era",
   "in the digital age",
   "in the realm of",
@@ -210,6 +305,39 @@ export const AI_PHRASES = [
   "harnessing the power",
   "pave the way",
   "paving the way",
+  "nestled",
+  "beacon of",
+  "testament to",
+  "rich tapestry",
+  "vibrant community",
+  "breathtaking",
+  "underscores",
+  "underscoring",
+  "showcasing",
+  "noteworthy",
+  "pivotal",
+  "paramount",
+  "instrumental",
+  "indispensable",
+  "ever-evolving",
+  "ever-changing",
+  "fast-paced",
+  "data-driven",
+  "user-centric",
+  "customer-centric",
+  "end-to-end",
+  "best-in-class",
+  "world-class",
+  "next-generation",
+  "thought leadership",
+  "actionable insights",
+  "key insights",
+  "deep dive",
+  "deep-dive",
+
+  // =========================
+  // Role / importance formulas
+  // =========================
   "plays a crucial role",
   "play a crucial role",
   "plays an important role",
@@ -218,6 +346,8 @@ export const AI_PHRASES = [
   "play a vital role",
   "plays a significant role",
   "play a significant role",
+  "plays a pivotal role",
+  "play a pivotal role",
   "serves as a",
   "serve as a",
   "acts as a",
@@ -245,12 +375,11 @@ export const AI_PHRASES = [
   "driving innovation",
   "fosters innovation",
   "promotes innovation",
-  "in conclusion",
-  "to conclude",
-  "in summary",
-  "to summarize",
+
+  // =========================
+  // Closing / summary formulas
+  // =========================
   "in short",
-  "in essence",
   "all in all",
   "overall,",
   "ultimately,",
@@ -265,25 +394,18 @@ export const AI_PHRASES = [
   "the key takeaway is",
   "the main takeaway",
   "the main takeaway is",
-  "it is clear that",
-  "it becomes clear that",
   "this demonstrates that",
   "this highlights that",
   "this shows that",
-  "it is safe to say",
-  "one might argue",
-  "it can be argued",
-  "it could be argued",
-  "it is reasonable to suggest",
-  "it is reasonable to assume",
-  "it is important to consider",
-  "it is worth considering",
-  "it is important to recognize",
-  "it is important to recognise",
-  "it is essential to understand",
-  "it is crucial to understand",
-  "it is useful to consider",
-  "it is helpful to consider",
+  "to wrap up",
+  "to sum up",
+  "in closing",
+  "final thoughts",
+  "as a final point",
+
+  // =========================
+  // Perspective / framing
+  // =========================
   "from a broader perspective",
   "from a practical perspective",
   "from a theoretical perspective",
@@ -308,6 +430,10 @@ export const AI_PHRASES = [
   "shaping the future",
   "shape the future",
   "paving the way for future",
+
+  // =========================
+  // Benefits / challenges templates
+  // =========================
   "numerous benefits",
   "several benefits",
   "key benefits",
@@ -334,10 +460,13 @@ export const AI_PHRASES = [
   "a number of challenges",
   "despite the challenges",
   "despite the limitations",
+
+  // =========================
+  // Explanation / example formulas
+  // =========================
   "for example",
   "for instance",
   "as an example",
-  "as a result",
   "this means that",
   "this allows",
   "this enables",
@@ -347,13 +476,7 @@ export const AI_PHRASES = [
   "in simple terms",
   "simply put",
   "put simply",
-  "in other words",
   "to put it simply",
-  "it is worth mentioning that",
-  "it is important to understand that",
-  "it is important to recognize that",
-  "it is essential to understand that",
-  "it is crucial to understand that",
   "one of the most important",
   "one of the key factors",
   "one of the key aspects",
@@ -374,12 +497,10 @@ export const AI_PHRASES = [
   "a critical factor",
   "a critical aspect",
   "a critical component",
-  "it can be seen that",
-  "it can be observed that",
-  "it can be understood that",
-  "it is evident that",
-  "it is apparent that",
-  "it is clear from",
+
+  // =========================
+  // Research-style (often generic LLM)
+  // =========================
   "evidence suggests that",
   "research suggests that",
   "studies have shown that",
@@ -396,6 +517,16 @@ export const AI_PHRASES = [
   "this contributes to",
   "this is particularly relevant",
   "this is particularly important",
+  "according to experts",
+  "experts suggest that",
+  "it has been widely recognized",
+  "it has been widely recognised",
+  "there is a growing body of research",
+  "a growing body of evidence",
+
+  // =========================
+  // Dual-adjective AI style
+  // =========================
   "clear and concise",
   "clear, concise, and",
   "simple and effective",
@@ -412,10 +543,71 @@ export const AI_PHRASES = [
   "user-friendly and accessible",
   "easy to understand",
   "easy to use",
-  "straightforward and effective"
+  "straightforward and effective",
+  "quick and easy",
+  "simple yet powerful",
+  "robust and reliable",
+  "innovative and effective",
+
+  // =========================
+  // Extra sentence-level patterns
+  // =========================
+  "in order to understand",
+  "in order to achieve",
+  "in order to ensure",
+  "when it comes to",
+  "at the end of the day",
+  "the fact of the matter is",
+  "it goes without saying",
+  "there is no doubt that",
+  "there is little doubt that",
+  "it is widely known that",
+  "it is widely accepted that",
+  "a closer examination reveals",
+  "upon closer examination",
+  "a careful analysis of",
+  "an in-depth analysis of",
+  "an in depth analysis of",
+  "this raises important questions",
+  "this raises several questions",
+  "this has significant implications",
+  "this has important implications",
+  "the implications of this are",
+  "the significance of this cannot be overstated",
+  "cannot be overstated",
+  "should not be underestimated",
+  "must be taken into consideration",
+  "must be carefully considered",
+  "requires careful consideration",
+  "deserves careful consideration",
+  "plays an integral role",
+  "is an integral part of",
+  "is a cornerstone of",
+  "is at the heart of",
+  "lies at the heart of",
+  "is of paramount importance",
+  "is of utmost importance",
+  "remains a topic of debate",
+  "remains a subject of debate",
+  "continues to be a topic of interest",
+  "has gained significant attention",
+  "has received considerable attention",
+  "has become increasingly important",
+  "has become increasingly relevant",
+  "in recent years",
+  "over the past few years",
+  "over the last decade",
+  "in the coming years",
+  "as we have seen",
+  "as discussed earlier",
+  "as will be discussed",
+  "the remainder of this",
+  "the rest of this essay",
+  "the rest of this article"
 ];
 
 export const HUMAN_SIGNALS = [
+  // Opinion / first person
   "i think",
   "i feel",
   "i believe",
@@ -432,6 +624,13 @@ export const HUMAN_SIGNALS = [
   "as far as i can tell",
   "from what i can tell",
   "i would say",
+  "i'd say",
+  "for me,",
+  "my take is",
+  "what i noticed",
+  "what stood out to me",
+
+  // Informal / conversational
   "kinda",
   "sort of",
   "kind of",
@@ -476,7 +675,20 @@ export const HUMAN_SIGNALS = [
   "don't quote me",
   "maybe",
   "perhaps",
-  "probably"
+  "probably",
+  "pretty sure",
+  "not really sure",
+  "could be wrong",
+  "might be wrong",
+  "just saying",
+  "no idea",
+  "beats me",
+  "weirdly enough",
+  "funnily enough",
+  "long story short",
+  "at least for me",
+  "on my end",
+  "from where i sit"
 ];
 
 function escapeRegExp(str) {
@@ -500,11 +712,23 @@ export function highlightText(text) {
 
   const matches = [];
   let m;
+
   while ((m = aiRegex.exec(text)) !== null) {
-    matches.push({ start: m.index, end: m.index + m[0].length, type: "ai", text: m[0] });
+    matches.push({
+      start: m.index,
+      end: m.index + m[0].length,
+      type: "ai",
+      text: m[0],
+    });
   }
+
   while ((m = humanRegex.exec(text)) !== null) {
-    matches.push({ start: m.index, end: m.index + m[0].length, type: "human", text: m[0] });
+    matches.push({
+      start: m.index,
+      end: m.index + m[0].length,
+      type: "human",
+      text: m[0],
+    });
   }
 
   matches.sort((a, b) => a.start - b.start || b.end - a.end);
