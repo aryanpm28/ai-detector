@@ -69,10 +69,8 @@ export default function Home() {
 
     setAnalyzing(true);
     setAnalyzeError('');
+
     try {
-      // This now runs on the backend: an LLM judges AI-likelihood,
-      // blended with a lightweight heuristic signal, and the result
-      // is saved to this user's history in MongoDB.
       const { data } = await api.post('/analyze', {
         text,
         fileName: fileName || undefined,
@@ -111,6 +109,7 @@ export default function Home() {
             <Link to="/history" className="text-sm text-slate-500 hover:text-primary-600">
               History
             </Link>
+
             <div className="relative">
               <button
                 onClick={() => setShowProfile((v) => !v)}
@@ -227,7 +226,7 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Right column – pie chart */}
+          {/* Right column – pie chart + highlights */}
           <div className="card p-5 min-h-[420px] flex flex-col">
             <h2 className="font-semibold text-slate-800 mb-1">AI vs Human</h2>
             <p className="text-xs text-slate-500 mb-4">
@@ -279,12 +278,16 @@ export default function Home() {
                         : 'bg-amber-50 text-amber-700'
                     }`}
                   >
-                    {result.source === 'ai_model' ? 'AI-model judgment' : 'Heuristic fallback (AI provider unavailable)'}
+                    {result.source === 'ai_model'
+                      ? 'AI-model judgment'
+                      : 'Heuristic fallback (AI provider unavailable)'}
                   </span>
                 </div>
 
                 {result.modelReasoning && (
-                  <p className="mt-2 text-xs text-slate-500 italic">"{result.modelReasoning}"</p>
+                  <p className="mt-2 text-xs text-slate-500 italic">
+                    "{result.modelReasoning}"
+                  </p>
                 )}
 
                 {result.keywordHits?.length > 0 && (
@@ -314,42 +317,58 @@ export default function Home() {
                       <p className="text-xs font-medium text-slate-500">Text highlights</p>
                       <div className="flex items-center gap-3 text-[11px]">
                         <span className="flex items-center gap-1">
-                          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-red-200 border border-red-300" />
+                          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-red-300 border border-red-500" />
                           AI-style
                         </span>
                         <span className="flex items-center gap-1">
-                          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-200 border border-emerald-300" />
+                          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-200 border border-emerald-500" />
                           Human-style
                         </span>
                       </div>
                     </div>
-                    <div className="max-h-56 overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 text-[13px] leading-relaxed text-slate-700 whitespace-pre-wrap break-words">
+
+                    <div
+                      className={`max-h-56 overflow-y-auto rounded-xl border p-3 text-[13px] leading-relaxed whitespace-pre-wrap break-words ${
+                        result.aiScore >= 65
+                          ? 'border-red-200 bg-red-50 text-slate-800'
+                          : result.humanScore >= 65
+                            ? 'border-emerald-200 bg-emerald-50 text-slate-800'
+                            : 'border-slate-200 bg-white text-slate-700'
+                      }`}
+                    >
                       {highlightText(text).map((seg, i) => {
                         if (seg.type === 'ai') {
                           return (
                             <mark
                               key={i}
-                              className="bg-red-100 text-red-900 rounded px-0.5 border-b border-red-300"
+                              className="bg-red-300/80 text-red-950 rounded px-0.5 border-b-2 border-red-600 font-medium"
                               title="Common AI-style phrase"
                             >
                               {seg.text}
                             </mark>
                           );
                         }
+
                         if (seg.type === 'human') {
                           return (
                             <mark
                               key={i}
-                              className="bg-emerald-100 text-emerald-900 rounded px-0.5 border-b border-emerald-300"
+                              className="bg-emerald-200 text-emerald-950 rounded px-0.5 border-b-2 border-emerald-500"
                               title="Human-style / informal signal"
                             >
                               {seg.text}
                             </mark>
                           );
                         }
+
                         return <span key={i}>{seg.text}</span>;
                       })}
                     </div>
+
+                    <p className="mt-2 text-[11px] text-slate-400">
+                      Only known AI-style / human-style phrases are highlighted — not the whole
+                      document. The panel tint reflects the overall AI vs Human score.
+                    </p>
                   </div>
                 )}
               </>
